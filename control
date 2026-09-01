@@ -1,0 +1,9 @@
+Package: com.guacforlife.debautopatcher
+Name: SileoDebAutoPatcher
+Version: 0.1.0
+Architecture: iphoneos-arm64
+Description: Automates the Sileo -> RootHide Patcher -> Sileo flow for tweaks that need roothide conversion. Accepts Sileo's "Not Updated" prompt, waits a cancellable 1.5s so the conversion options can still be changed, activates Convert .deb, hands the result back to Sileo, and taps Get — stopping at the confirm screen.
+Maintainer: guacforlife
+Author: guacforlife
+Section: Tweaks
+Depends: mobilesubstrate, preferenceloader

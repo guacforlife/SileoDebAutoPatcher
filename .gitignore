@@ -1,0 +1,4 @@
+.theos/
+packages/
+harness/logs/
+harness/.burned

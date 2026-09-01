@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>title</key>
+	<string>SileoDebAutoPatcher</string>
+	<key>items</key>
+	<array>
+		<dict>
+			<key>cell</key><string>PSGroupCell</string>
+			<key>footerText</key>
+			<string>Drives the Sileo → RootHide Patcher → Sileo round trip for tweaks that need roothide conversion.</string>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSSwitchCell</string>
+			<key>label</key><string>Enabled</string>
+			<key>key</key><string>enabled</string>
+			<key>default</key><true/>
+			<key>defaults</key><string>com.guacforlife.debautopatcher</string>
+		</dict>
+
+		<dict>
+			<key>cell</key><string>PSGroupCell</string>
+			<key>label</key><string>Sileo</string>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSSwitchCell</string>
+			<key>label</key><string>Accept the conversion prompt</string>
+			<key>key</key><string>autoConvertPrompt</string>
+			<key>default</key><true/>
+			<key>defaults</key><string>com.guacforlife.debautopatcher</string>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSSwitchCell</string>
+			<key>label</key><string>Tap Get on the way back</string>
+			<key>key</key><string>autoGet</string>
+			<key>default</key><true/>
+			<key>defaults</key><string>com.guacforlife.debautopatcher</string>
+		</dict>
+
+		<dict>
+			<key>cell</key><string>PSGroupCell</string>
+			<key>label</key><string>RootHide Patcher</string>
+			<key>footerText</key>
+			<string>The countdown is your window to change the conversion options. Tap the pill on screen to cancel that run — a manual Convert still gets handed back to Sileo automatically.</string>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSSwitchCell</string>
+			<key>label</key><string>Tap Convert .deb</string>
+			<key>key</key><string>autoConvert</string>
+			<key>default</key><true/>
+			<key>defaults</key><string>com.guacforlife.debautopatcher</string>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSLinkListCell</string>
+			<key>label</key><string>Countdown</string>
+			<key>key</key><string>convertDelay</string>
+			<key>detail</key><string>PSListItemsController</string>
+			<key>default</key><real>1.5</real>
+			<key>defaults</key><string>com.guacforlife.debautopatcher</string>
+			<key>validValues</key>
+			<array><real>0</real><real>1</real><real>1.5</real><real>3</real><real>5</real><real>10</real></array>
+			<key>validTitles</key>
+			<array>
+				<string>None</string>
+				<string>1 second</string>
+				<string>1.5 seconds</string>
+				<string>3 seconds</string>
+				<string>5 seconds</string>
+				<string>10 seconds</string>
+			</array>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSSwitchCell</string>
+			<key>label</key><string>Hand the result back to Sileo</string>
+			<key>key</key><string>autoShareToSileo</string>
+			<key>default</key><true/>
+			<key>defaults</key><string>com.guacforlife.debautopatcher</string>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSLinkListCell</string>
+			<key>label</key><string>Hold the Done alert</string>
+			<key>key</key><string>shareDelay</string>
+			<key>detail</key><string>PSListItemsController</string>
+			<key>default</key><real>1.5</real>
+			<key>defaults</key><string>com.guacforlife.debautopatcher</string>
+			<key>validValues</key>
+			<array><real>0</real><real>1.5</real><real>3</real><real>6</real></array>
+			<key>validTitles</key>
+			<array>
+				<string>Don't hold</string>
+				<string>1.5 seconds</string>
+				<string>3 seconds</string>
+				<string>6 seconds</string>
+			</array>
+		</dict>
+
+		<dict>
+			<key>cell</key><string>PSGroupCell</string>
+			<key>footerText</key>
+			<string>SileoDebAutoPatcher never taps Confirm in the queue — that step is always yours. Emergency stop: create /var/tmp/.debautopatcher.off and relaunch the app.</string>
+		</dict>
+	</array>
+</dict>
+</plist>

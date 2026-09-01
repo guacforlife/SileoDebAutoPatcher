@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- ElleKit filter. MUST be 644 (ElleKit silently skips 600 plists, and the
+     Patcher CLI + dpkg leave it 600). One dylib, both ends of the flow. -->
+<plist version="1.0">
+<dict>
+	<key>Filter</key>
+	<dict>
+		<key>Bundles</key>
+		<array>
+			<string>org.coolstar.SileoStore</string>
+			<string>com.roothide.patcher</string>
+		</array>
+	</dict>
+</dict>
+</plist>
