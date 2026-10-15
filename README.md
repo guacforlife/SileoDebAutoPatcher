@@ -45,7 +45,7 @@ One dylib, injected into both `org.coolstar.SileoStore` and
 |---|---|
 | Accept `Not Updated` | It is a genuine `UIAlertController` with hardcoded English strings (no `.lproj` entry), so matching `Not Updated` / `Convert` is locale-safe. The action's handler is invoked via the private `handler` KVC key. |
 | Detect the handoff back | The delegate's `application:openURL:options:` is swizzled on whatever class the *live* delegate actually is — no dependency on the mangled Swift name. |
-| Tap `Convert .deb` | Patcher is pure SwiftUI: four ObjC classes, no view controller, no target/action. The button is reachable only as a `SwiftUI.AccessibilityNode`, activated with `-accessibilityActivate`. |
+| Tap `Convert .deb` | Patcher is pure SwiftUI: four ObjC classes, no view controller, no target/action. The button is reachable only as a `SwiftUI.AccessibilityNode`, activated with `-accessibilityActivate`. SwiftUI only builds those nodes when app accessibility is on (Full Keyboard Access, VoiceOver and the like turn it on system-wide), so inside Patcher alone the tweak answers `_AXSApplicationAccessibilityEnabled` with yes and, if UIKit's accessibility bundle is still not loaded, loads it. |
 | Tap `Get` | `PackageViewController.downloadButton` is a real `UIButton` subclass, so `sendActionsForControlEvents:` works. |
 | Open the confirm screen | `Get` only queues the package and raises the collapsed popup *bar*. Sileo expands it via Swift-only code, which calls LNPopupController's ObjC `-openPopupAnimated:completion:` — that selector is reachable. |
 

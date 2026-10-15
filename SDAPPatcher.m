@@ -12,19 +12,71 @@
 //     device before this file was written: activate returned YES and the real
 //     conversion started.
 //
+// SwiftUI only builds those nodes once UIKit has loaded its accessibility
+// bundle, and UIKit only does that when app accessibility is on
+// (ApplicationAccessibilityEnabled in com.apple.Accessibility). ip14 has it on
+// because Full Keyboard Access is on; ip7p has it off and the tree there held
+// zero labelled nodes. SDAPPatcherEnsureAccessibility turns it on for this
+// process only.
+//
 // Activating the real button (rather than shelling out to patch.sh ourselves)
 // means whatever the user has done to the three option toggles during the
 // countdown is respected for free.
 
 #import "SDAPCommon.h"
 #import "SDAPOverlay.h"
+#import <dlfcn.h>
+#import <mach-o/dyld.h>
 #import <notify.h>
+#import <objc/message.h>
 #import <objc/runtime.h>
+#import <substrate.h>
 
 void SDAPPatcherHandleAlert(UIAlertController *ac);
 
 static BOOL sCancelled = NO;
 static char kAlertHandledKey;
+
+#pragma mark - Accessibility
+
+// libAccessibility's _AXSApplicationAccessibilityEnabled reads the system-wide
+// setting. Answering YES here changes nothing outside Patcher.
+static Boolean (*sOrigAppAXEnabled)(void);
+static Boolean SDAPAppAXEnabled(void) { return true; }
+
+static void SDAPPatcherHookAccessibilityCheck(void) {
+	void *fn = dlsym(RTLD_DEFAULT, "_AXSApplicationAccessibilityEnabled");
+	if (!fn) { SDAPEvent(@"PATCHER_AX", @"FAIL", @"_AXSApplicationAccessibilityEnabled not found"); return; }
+	MSHookFunction(fn, (void *)SDAPAppAXEnabled, (void **)&sOrigAppAXEnabled);
+}
+
+static BOOL SDAPUIKitAXBundleLoaded(void) {
+	uint32_t n = _dyld_image_count();
+	for (uint32_t i = 0; i < n; i++) {
+		const char *name = _dyld_get_image_name(i);
+		if (name && strstr(name, "/UIKit.axbundle/")) return YES;
+	}
+	return NO;
+}
+
+// When UIKit has not loaded its accessibility bundle, load it now: the same
+// two calls that took Patcher's tree from 0 labelled nodes to 7 on ip7p
+// (Frida, 2026-10-15). Main thread only.
+static void SDAPPatcherEnsureAccessibility(void) {
+	if (SDAPUIKitAXBundleLoaded()) return;
+	BOOL was = sOrigAppAXEnabled ? (BOOL)sOrigAppAXEnabled() : NO;
+	@try {
+		UIApplication *app = [UIApplication sharedApplication];
+		SEL init = NSSelectorFromString(@"_accessibilityInit");
+		if ([app respondsToSelector:init]) ((void (*)(id, SEL))objc_msgSend)(app, init);
+	} @catch (NSException *e) {
+		SDAPEvent(@"PATCHER_AX", @"FAIL", @"_accessibilityInit threw %@: %@", e.name, e.reason);
+	}
+	void (*uiInit)(void) = (void (*)(void))dlsym(RTLD_DEFAULT, "_UIAccessibilityInitialize");
+	if (uiInit) uiInit();
+	SDAPEvent(@"PATCHER_AX", SDAPUIKitAXBundleLoaded() ? @"OK" : @"FAIL",
+		@"UIKit accessibility loaded for Patcher (system setting %d)", (int)was);
+}
 
 #pragma mark - Activation
 
@@ -75,6 +127,8 @@ static void SDAPPatcherFileOpen(NSNotification *note) {
 	double delay = SDAPPrefDouble(@"convertDelay", 1.5);
 	if (delay < 0) delay = 0;
 	if (delay > 30) delay = 30;
+
+	SDAPPatcherEnsureAccessibility();
 
 	SDAPEvent(@"PATCHER_COUNTDOWN", @"OK", @"%.1fs", delay);
 	[SDAPOverlay showCountdown:delay onCancel:^{ sCancelled = YES; }];
@@ -180,6 +234,9 @@ static void SDAPPatcherInit(void) {
 	@autoreleasepool {
 		if (![SDAPBundleID() isEqualToString:SDAP_BID_PATCHER]) return;
 		if (SDAPKillSwitchPresent()) { SDAPEvent(@"PATCHER_LAUNCH", @"SKIP", @"kill switch present"); return; }
+
+		// Before UIKit starts, so a launch already sees app accessibility on.
+		SDAPPatcherHookAccessibilityCheck();
 
 		// Never leave the pill on screen if the app goes away mid-countdown.
 		[[NSNotificationCenter defaultCenter] addObserverForName:UIApplicationDidEnterBackgroundNotification
